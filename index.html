@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Almoxarifado</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ==================== TELA DE LOGIN ==================== -->
+  <div id="tela-login" class="tela-login">
+    <div class="caixa-login">
+      <h1>📦 Sistema de Almoxarifado</h1>
+      <p class="subtitulo-login">Entre com suas credenciais para acessar</p>
+
+      <form id="form-login">
+        <div class="campo">
+          <label for="login-usuario">Usuário</label>
+          <input type="text" id="login-usuario" required placeholder="admin ou comum" autocomplete="username">
+        </div>
+        <div class="campo">
+          <label for="login-senha">Senha</label>
+          <input type="password" id="login-senha" required placeholder="senha" autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primario btn-bloco">Entrar</button>
+        <p id="login-erro" class="mensagem mensagem-erro oculto">Usuário ou senha inválidos.</p>
+      </form>
+
+      <div class="info-login">
+        <p><strong>Administrador:</strong> admin / admin123</p>
+        <p><strong>Usuário Comum:</strong> comum / comum123</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== APLICAÇÃO ==================== -->
+  <div id="app" class="oculto">
+    <header class="topo">
+      <h1>📦 Almoxarifado</h1>
+      <div class="info-usuario">
+        <span id="usuario-logado"></span>
+        <button type="button" id="btn-sair" class="btn btn-perigo">Sair</button>
+      </div>
+    </header>
+
+    <nav class="menu">
+      <button type="button" class="item-menu ativo" data-secao="dashboard">Dashboard</button>
+      <button type="button" class="item-menu" data-secao="cadastro" data-permissao="produto.cadastrar">Cadastrar Produto</button>
+      <button type="button" class="item-menu" data-secao="produtos" data-permissao="produto.listar">Gerenciar Produtos</button>
+      <button type="button" class="item-menu" data-secao="entrada" data-permissao="entrada.cadastrar">Registrar Entrada</button>
+      <button type="button" class="item-menu" data-secao="saida" data-permissao="saida.cadastrar">Registrar Saída</button>
+      <button type="button" class="item-menu" data-secao="estoque" data-permissao="estoque.consultar">Consultar Estoque</button>
+      <button type="button" class="item-menu" data-secao="historico" data-permissao="historico.listar">Histórico</button>
+    </nav>
+
+    <main>
+
+      <!-- ==================== DASHBOARD ==================== -->
+      <section id="secao-dashboard" class="secao ativa">
+        <h2>Dashboard</h2>
+
+        <div class="cards-resumo">
+          <div class="card-resumo">
+            <span class="card-icone">📦</span>
+            <div>
+              <span class="card-valor" id="card-total-produtos">0</span>
+              <span class="card-rotulo">Produtos</span>
+            </div>
+          </div>
+          <div class="card-resumo card-alerta">
+            <span class="card-icone">⚠️</span>
+            <div>
+              <span class="card-valor" id="card-estoque-baixo">0</span>
+              <span class="card-rotulo">Estoque Baixo</span>
+            </div>
+          </div>
+          <div class="card-resumo card-critico">
+            <span class="card-icone">🚨</span>
+            <div>
+              <span class="card-valor" id="card-sem-estoque">0</span>
+              <span class="card-rotulo">Sem Estoque</span>
+            </div>
+          </div>
+          <div class="card-resumo">
+            <span class="card-icone">🔄</span>
+            <div>
+              <span class="card-valor" id="card-movimentacoes">0</span>
+              <span class="card-rotulo">Movimentações</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="painel">
+          <h3>Movimentações Recentes</h3>
+          <ul id="lista-movimentacoes" class="lista-movimentacoes"></ul>
+          <p id="dashboard-mov-vazio" class="vazio oculto">Nenhuma movimentação registrada.</p>
+        </div>
+
+        <div class="painel">
+          <h3>Atalhos</h3>
+          <div class="atalhos">
+            <button type="button" class="btn atalho" data-secao="cadastro" data-permissao="produto.cadastrar">➕ Novo Produto</button>
+            <button type="button" class="btn atalho" data-secao="entrada" data-permissao="entrada.cadastrar">📥 Registrar Entrada</button>
+            <button type="button" class="btn atalho" data-secao="saida" data-permissao="saida.cadastrar">📤 Registrar Saída</button>
+            <button type="button" class="btn atalho" data-secao="estoque" data-permissao="estoque.consultar">🔍 Consultar Estoque</button>
+            <button type="button" class="btn atalho" data-secao="historico" data-permissao="historico.listar">📜 Histórico</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== CADASTRO DE PRODUTO ==================== -->
+      <section id="secao-cadastro" class="secao">
+        <h2>Cadastrar Produto</h2>
+
+        <form id="form-produto" class="painel" novalidate>
+          <div class="linha-campos">
+            <div class="campo">
+              <label for="prod-codigo">Código *</label>
+              <input type="text" id="prod-codigo" required>
+            </div>
+            <div class="campo">
+              <label for="prod-nome">Nome *</label>
+              <input type="text" id="prod-nome" required>
+            </div>
+            <div class="campo">
+              <label for="prod-categoria">Categoria *</label>
+              <input type="text" id="prod-categoria" required>
+            </div>
+          </div>
+
+          <div class="linha-campos">
+            <div class="campo">
+              <label for="prod-preco">Preço (R$) *</label>
+              <input type="number" id="prod-preco" required step="0.01" min="0.01">
+            </div>
+            <div class="campo">
+              <label for="prod-estoque-minimo">Estoque Mínimo *</label>
+              <input type="number" id="prod-estoque-minimo" required min="0" step="1">
+            </div>
+            <div class="campo">
+              <label for="prod-quantidade">Quantidade Inicial</label>
+              <input type="number" id="prod-quantidade" min="0" step="1" value="0">
+            </div>
+          </div>
+
+          <div class="linha-campos">
+            <div class="campo">
+              <label for="prod-localizacao">Localização</label>
+              <input type="text" id="prod-localizacao" placeholder="Ex.: Corredor A, Prateleira 3">
+            </div>
+            <div class="campo">
+              <label for="prod-descricao">Descrição</label>
+              <input type="text" id="prod-descricao">
+            </div>
+          </div>
+
+          <p id="form-produto-aviso" class="mensagem mensagem-aviso oculto"></p>
+          <p id="form-produto-msg" class="mensagem oculto"></p>
+
+          <div class="acoes-form">
+            <button type="submit" class="btn btn-primario">Salvar Produto</button>
+            <button type="button" class="btn btn-neutro" id="btn-limpar-form">Limpar</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ==================== GERENCIAR PRODUTOS ==================== -->
+      <section id="secao-produtos" class="secao">
+        <h2>Gerenciar Produtos</h2>
+
+        <div class="barra-filtros">
+          <input type="search" id="filtro-pesquisa" placeholder="Pesquisar por nome ou código...">
+          <select id="filtro-categoria">
+            <option value="">Todas as categorias</option>
+          </select>
+          <select id="filtro-situacao">
+            <option value="">Todas as situações</option>
+            <option value="NORMAL">Normal</option>
+            <option value="BAIXO">Estoque baixo</option>
+            <option value="SEM_ESTOQUE">Sem estoque</option>
+          </select>
+          <select id="filtro-ordenacao">
+            <option value="nome-asc">Nome (A–Z)</option>
+            <option value="nome-desc">Nome (Z–A)</option>
+            <option value="codigo-asc">Código (A–Z)</option>
+            <option value="codigo-desc">Código (Z–A)</option>
+            <option value="quantidade-asc">Quantidade (menor→maior)</option>
+            <option value="quantidade-desc">Quantidade (maior→menor)</option>
+            <option value="preco-desc">Preço (maior→menor)</option>
+            <option value="preco-asc">Preço (menor→maior)</option>
+          </select>
+          <button type="button" class="btn btn-neutro" id="btn-limpar-filtros">Limpar filtros</button>
+        </div>
+
+        <div class="painel">
+          <table class="tabela">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Nome</th>
+                <th>Categoria</th>
+                <th>Estoque</th>
+                <th>Preço</th>
+                <th>Situação</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="corpo-tabela-produtos"></tbody>
+          </table>
+          <p id="produtos-vazio" class="vazio oculto">Nenhum produto encontrado.</p>
+        </div>
+      </section>
+
+      <!-- ==================== REGISTRAR ENTRADA ==================== -->
+      <section id="secao-entrada" class="secao">
+        <h2>Registrar Entrada</h2>
+
+        <form id="form-entrada" class="painel" novalidate>
+          <div class="linha-campos">
+            <div class="campo">
+              <label for="entrada-produto">Produto *</label>
+              <select id="entrada-produto" required></select>
+            </div>
+            <div class="campo">
+              <label for="entrada-quantidade">Quantidade *</label>
+              <input type="number" id="entrada-quantidade" required min="1" step="1">
+            </div>
+          </div>
+
+          <p id="entrada-msg" class="mensagem oculto"></p>
+
+          <div class="acoes-form">
+            <button type="submit" class="btn btn-primario">Registrar Entrada</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ==================== REGISTRAR SAÍDA ==================== -->
+      <section id="secao-saida" class="secao">
+        <h2>Registrar Saída</h2>
+
+        <form id="form-saida" class="painel" novalidate>
+          <div class="linha-campos">
+            <div class="campo">
+              <label for="saida-produto">Produto *</label>
+              <select id="saida-produto" required></select>
+            </div>
+            <div class="campo">
+              <label for="saida-quantidade">Quantidade *</label>
+              <input type="number" id="saida-quantidade" required min="1" step="1">
+            </div>
+          </div>
+
+          <div class="campo">
+            <label id="saida-disponivel">Disponível: —</label>
+          </div>
+
+          <p id="saida-msg" class="mensagem oculto"></p>
+
+          <div class="acoes-form">
+            <button type="submit" class="btn btn-primario">Registrar Saída</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ==================== CONSULTAR ESTOQUE ==================== -->
+      <section id="secao-estoque" class="secao">
+        <h2>Consultar Estoque</h2>
+
+        <div class="painel">
+          <h3>Produtos em Alerta</h3>
+          <p class="subtitulo-secao">Produtos com quantidade menor ou igual ao estoque mínimo, ou sem estoque.</p>
+          <ul id="lista-alertas" class="lista-alertas"></ul>
+          <p id="estoque-vazio" class="vazio oculto">✅ Nenhum produto em alerta. Todo o estoque está em nível normal.</p>
+        </div>
+      </section>
+
+      <!-- ==================== HISTÓRICO DE MOVIMENTAÇÕES ==================== -->
+      <section id="secao-historico" class="secao">
+        <h2>Histórico de Movimentações</h2>
+
+        <div class="barra-filtros">
+          <select id="filtro-tipo">
+            <option value="">Todos os tipos</option>
+            <option value="ENTRADA">Entradas</option>
+            <option value="SAIDA">Saídas</option>
+          </select>
+          <select id="filtro-produto">
+            <option value="">Todos os produtos</option>
+          </select>
+          <select id="filtro-responsavel">
+            <option value="">Todos os responsáveis</option>
+          </select>
+          <label class="campo-periodo">
+            Período:
+            <input type="date" id="filtro-data-inicio">
+            <span>até</span>
+            <input type="date" id="filtro-data-fim">
+          </label>
+          <button type="button" class="btn btn-neutro" id="btn-limpar-filtros-historico">Limpar filtros</button>
+        </div>
+
+        <div class="painel">
+          <table class="tabela">
+            <thead>
+              <tr>
+                <th>Data/Hora</th>
+                <th>Produto</th>
+                <th>Tipo</th>
+                <th>Quantidade</th>
+                <th>Responsável</th>
+              </tr>
+            </thead>
+            <tbody id="corpo-tabela-historico"></tbody>
+          </table>
+          <p id="historico-vazio" class="vazio oculto">Nenhuma movimentação encontrada.</p>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="rodape">
+      <p>Sistema de Almoxarifado — dados persistidos via localStorage.</p>
+    </footer>
+  </div>
+
+  <!-- ==================== MODAIS ==================== -->
+  <div id="modal-overlay" class="modal-overlay oculto">
+    <div id="modal-detalhe" class="modal oculto">
+      <h3>Detalhes do Produto</h3>
+      <div id="detalhe-conteudo" class="detalhe-produto"></div>
+      <div class="acoes-modal">
+        <button type="button" class="btn btn-neutro" id="btn-fechar-detalhe">Fechar</button>
+        <button type="button" class="btn btn-primario" id="btn-editar-do-detalhe">Editar</button>
+      </div>
+    </div>
+
+    <div id="modal-excluir" class="modal oculto">
+      <h3>Confirmar Exclusão</h3>
+      <p id="excluir-texto"></p>
+      <div class="acoes-modal">
+        <button type="button" class="btn btn-neutro" id="btn-cancelar-exclusao">Cancelar</button>
+        <button type="button" class="btn btn-perigo" id="btn-confirmar-exclusao">Excluir</button>
+      </div>
+    </div>
+
+    <div id="modal-edicao" class="modal oculto">
+      <h3>Editar Produto</h3>
+      <form id="form-edicao" novalidate>
+        <div class="linha-campos">
+          <div class="campo">
+            <label for="edit-codigo">Código *</label>
+            <input type="text" id="edit-codigo" required>
+          </div>
+          <div class="campo">
+            <label for="edit-nome">Nome *</label>
+            <input type="text" id="edit-nome" required>
+          </div>
+          <div class="campo">
+            <label for="edit-categoria">Categoria *</label>
+            <input type="text" id="edit-categoria" required>
+          </div>
+        </div>
+        <div class="linha-campos">
+          <div class="campo">
+            <label for="edit-preco">Preço (R$) *</label>
+            <input type="number" id="edit-preco" required step="0.01" min="0.01">
+          </div>
+          <div class="campo">
+            <label for="edit-estoque-minimo">Estoque Mínimo *</label>
+            <input type="number" id="edit-estoque-minimo" required min="0" step="1">
+          </div>
+          <div class="campo">
+            <label for="edit-localizacao">Localização</label>
+            <input type="text" id="edit-localizacao">
+          </div>
+        </div>
+        <div class="campo">
+          <label for="edit-descricao">Descrição</label>
+          <input type="text" id="edit-descricao">
+        </div>
+        <p id="form-edicao-msg" class="mensagem oculto"></p>
+        <div class="acoes-modal">
+          <button type="button" class="btn btn-neutro" id="btn-cancelar-edicao">Cancelar</button>
+          <button type="submit" class="btn btn-primario">Salvar Alterações</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== TOAST ==================== -->
+  <div id="toast" class="toast oculto"></div>
+
+  <script src="js/acesso.js"></script>
+  <script src="js/dados.js"></script>
+  <script src="js/persistencia.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
